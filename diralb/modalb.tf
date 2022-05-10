@@ -1,9 +1,10 @@
 module mod_vars{
-    source = "../dir_vars"
+    source = "../dirvars"
 }
 
-variable vpc_id{}
+variable vpcid{}
 variable sgid{}
+variable subnetid{}
 
 
 data "aws_instances" "websers" {
@@ -15,7 +16,7 @@ data "aws_instances" "websers" {
 
 resource "aws_lb_target_group" "reslbtg" {
 
-  count = lengh(data.aws_instances.websers)
+  count = length(data.aws_instances.websers.ids)
   health_check{
 	interval = 10
 	path = "/"
@@ -25,15 +26,15 @@ resource "aws_lb_target_group" "reslbtg" {
 	unhealthy_threshold = 2
   }
   
-  name     = "${module.mod_vars.env}_lbtg${count.index}"
+  name     = "${module.mod_vars.env}lbtg${count.index}"
   port     = 80
   protocol = "HTTP"
   target_type = "instance"
-  vpc_id   = var.vpc_id
+  vpc_id   = var.vpcid
 }
 
 resource "aws_lb" "aws_alb" {
-  name               = "${module.mod_vars.env}_alb"
+  name               = "${module.mod_vars.env}alb"
   internal           = false
   ip_address_type = "ipv4"
   load_balancer_type = "application"
@@ -54,7 +55,7 @@ resource "aws_lb" "aws_alb" {
 }
 
 resource "aws_lb_listener" "reslblis" {
-  count            = lengh(data.aws_instances.websers)
+  count            = length(data.aws_instances.websers.ids)
   load_balancer_arn = aws_lb.aws_alb.arn
   port              = 80
   protocol          = "HTTP"
@@ -68,19 +69,13 @@ resource "aws_lb_listener" "reslblis" {
 }
 
 resource "aws_alb_target_group_attachment" "restglink" {
-  count            = lengh(data.aws_instances.websers)
+  count            = length(data.aws_instances.websers.ids)
   target_group_arn = aws_lb_target_group.reslbtg[count.index].arn
   target_id        = "${element(data.aws_instances.websers, count.index)}"
   port             = 80
 }
 
-/* resource "aws_alb_target_group_attachment" "restglink"{
-  #count = lengh(aws_instance.resinstance)
-  target_group_arn = aws_lb_target_group.reslbtg.arn
-  #target_id = aws_instance.resinstance[count.index].id
-  target_id = aws_instance.resinstance.id
-} 
-
+/* 
 output outtg_arn{
     value = aws_lb_target_group.reslbtg.arn
 } */

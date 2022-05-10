@@ -8,7 +8,7 @@ provider "aws"{
 
 module "modsg" {
   vpcid = var.vpcid
-#  sgid = var.sgid
+  #sgid = var.sgid
   source = "./dirsg"
 }
 
@@ -17,10 +17,5 @@ module "modalb"{
   sgid = "${module.modsg.outsgalbid}"
   subnetid = var.subnetid
 
-
   source = "./diralb"
-}
-
- output outtg_arn{
-	value=module.modalb.outtg_arn
 }

@@ -3,7 +3,7 @@ module "modvars"{
 }
 
 variable vpcid{}
-variable sgid{}
+#variable sgid{}
 #variable subnetid{}
 
 resource "aws_security_group" "ressgalb" {
